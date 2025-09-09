@@ -1,9 +1,13 @@
 package com.kh.auth.api.service.impl;
 
-import com.kh.auth.api.dto.request.UserRequest;
-import com.kh.auth.api.dto.response.UserResponse;
 import com.kh.auth.api.repository.UserRepository;
+import com.kh.auth.api.dto.response.UserResponse;
+import com.kh.auth.api.entity.UserEntity;
+import com.kh.auth.api.mapper.UserMapper; // Import the mapper
 import com.kh.auth.api.service.JwtService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -11,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit; // Use ChronoUnit for clarity
 import java.util.Date;
 
 @Service
@@ -18,6 +23,7 @@ import java.util.Date;
 public class JwtServiceImpl implements JwtService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper; // 1. Inject the mapper
 
     @Value("${app.jwt.secret}")
     private String jwtSecret;
@@ -33,48 +39,58 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String generateAccessToken(UserRequest user) {
+    public String generateAccessToken(UserResponse user) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .subject(user.getUsername())
+                .subject(user.getUsername()) // Correct modern API call
                 .claim("role", user.getRole().name())
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(accessMinutes * 60)))
-                .signWith(key(), Jwts.SIG.HS256)
+                // Use ChronoUnit for better readability
+                .expiration(Date.from(now.plus(accessMinutes, ChronoUnit.MINUTES)))
+                .signWith(key()) // Correct modern API call
                 .compact();
     }
 
     @Override
-    public String generateRefreshToken(UserRequest user) {
+    public String generateRefreshToken(UserResponse user) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .subject(user.getUsername())
+                .subject(user.getUsername()) // Correct modern API call
                 .claim("type", "refresh")
                 .issuedAt(Date.from(now))
-                .expiration(Date.from(now.plusSeconds(refreshDays * 24 * 3600)))
-                .signWith(key(), Jwts.SIG.HS256)
+                .expiration(Date.from(now.plus(refreshDays, ChronoUnit.DAYS)))
+                .signWith(key()) // Correct modern API call
                 .compact();
     }
 
     @Override
     public UserResponse parseAccessToken(String token) {
-        var claims = parse(token);
-        var username = claims.getSubject();
-        return userRepository.findByUsername(username).orElseThrow();
+        Claims claims = parse(token);
+        String username = claims.getSubject();
+        UserEntity userEntity = userRepository.findByUsername(username)
+                .orElseThrow(() -> new JwtException("User not found"));
+        // 2. Use the mapper to convert Entity to DTO
+        return userMapper.toResponse(userEntity);
     }
 
     @Override
     public UserResponse parseRefreshToken(String token) {
-        var claims = parse(token);
-        if (!"refresh".equals(claims.get("type"))) throw new JwtException("Not a refresh token");
-        var username = claims.getSubject();
-        return userRepository.findByUsername(username).orElseThrow();
+        Claims claims = parse(token);
+        if (!"refresh".equals(claims.get("type"))) {
+            throw new JwtException("Not a refresh token");
+        }
+        String username = claims.getSubject();
+        UserEntity userEntity = userRepository.findByUsername(username)
+                .orElseThrow(() -> new JwtException("User not found"));
+        // 3. Use the mapper here as well
+        return userMapper.toResponse(userEntity);
     }
 
     private Claims parse(String token) {
-        return Jwts.parser().verifyWith(key()).build()
-                .parseSignedClaims(token).getPayload();
+        return Jwts.parser()
+                .verifyWith(key()) // Correct modern API call
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }
-
-

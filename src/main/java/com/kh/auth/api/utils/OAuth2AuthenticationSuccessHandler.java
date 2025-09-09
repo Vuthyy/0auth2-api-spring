@@ -1,8 +1,9 @@
 package com.kh.auth.api.utils;
 
+import com.kh.auth.api.service.JwtService;
+import com.kh.auth.api.service.UserService;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -20,8 +21,7 @@ public class OAuth2AuthenticationSuccessHandler
     private final UserService userService;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(jakarta.servlet.http.HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         var oAuth2User = (OAuth2User) authentication.getPrincipal();
         String username = (String) oAuth2User.getAttributes().get("username");
         var user = userService.loadDomainUser(username);
@@ -29,7 +29,6 @@ public class OAuth2AuthenticationSuccessHandler
         String access = jwtService.generateAccessToken(user);
         String refresh = jwtService.generateRefreshToken(user);
 
-        // send tokens to frontend — example: redirect with tokens in fragment (or set cookies)
         String redirectUri = request.getParameter("redirect_uri");
         if (redirectUri == null || redirectUri.isBlank()) redirectUri = "http://localhost:3000/oauth2/callback";
 
@@ -38,7 +37,6 @@ public class OAuth2AuthenticationSuccessHandler
                 .queryParam("refreshToken", refresh)
                 .build().toUriString();
 
-        // or set httpOnly cookies (choose one strategy)
         Cookie refreshCookie = new Cookie("refresh_token", refresh);
         refreshCookie.setHttpOnly(true);
         refreshCookie.setPath("/");

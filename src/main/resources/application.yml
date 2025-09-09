@@ -34,37 +34,37 @@ spring:
     ansi:
       enabled: ALWAYS
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: YOUR_GOOGLE_CLIENT_ID
-            client-secret: YOUR_GOOGLE_CLIENT_SECRET
-            scope: openid, profile, email
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-          github:
-            client-id: YOUR_GITHUB_CLIENT_ID
-            client-secret: YOUR_GITHUB_CLIENT_SECRET
-            scope: user:email
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-          facebook:
-            client-id: YOUR_FACEBOOK_APP_ID
-            client-secret: YOUR_FACEBOOK_APP_SECRET
-            scope: email, public_profile
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
-        provider:
-          facebook:
-            authorization-uri: https://www.facebook.com/v12.0/dialog/oauth
-            token-uri: https://graph.facebook.com/v12.0/oauth/access_token
-            user-info-uri: https://graph.facebook.com/v12.0/me?fields=id,name,email,picture
-            user-name-attribute: id
-
-  app:
-    jwt:
-      secret: "PLEASE_CHANGE_THIS_TO_A_256_BIT_RANDOM_SECRET_STRING_PLEASE_..."
-      access-exp-minutes: 15
-      refresh-exp-days: 30
+#  security:
+#    oauth2:
+#      client:
+#        registration:
+#          google:
+#            client-id: YOUR_GOOGLE_CLIENT_ID
+#            client-secret: YOUR_GOOGLE_CLIENT_SECRET
+#            scope: openid, profile, email
+#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+#          github:
+#            client-id: YOUR_GITHUB_CLIENT_ID
+#            client-secret: YOUR_GITHUB_CLIENT_SECRET
+#            scope: user:email
+#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+#          facebook:
+#            client-id: YOUR_FACEBOOK_APP_ID
+#            client-secret: YOUR_FACEBOOK_APP_SECRET
+#            scope: email, public_profile
+#            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+#        provider:
+#          facebook:
+#            authorization-uri: https://www.facebook.com/v12.0/dialog/oauth
+#            token-uri: https://graph.facebook.com/v12.0/oauth/access_token
+#            user-info-uri: https://graph.facebook.com/v12.0/me?fields=id,name,email,picture
+#            user-name-attribute: id
+#
+app:
+  jwt:
+    secret: wingbanksecretkey12345678901234567890
+    access-exp-minutes: 15
+    refresh-exp-days: 30
 
   logging:
     level:
@@ -73,13 +73,13 @@ spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
 
-#management:
-#  tracing:
-#    enabled: true
-#    sampling:
-#      probability: 0.0   # disables span reporting without tearing tracing out
-#
-#  endpoints:
-#    web:
-#      exposure:
-#        include: refresh, bus-refresh, health
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 0.0   # disables span reporting without tearing tracing out
+
+  endpoints:
+    web:
+      exposure:
+        include: refresh, bus-refresh, health

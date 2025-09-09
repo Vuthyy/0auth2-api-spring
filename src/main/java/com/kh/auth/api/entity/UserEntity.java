@@ -3,10 +3,7 @@ package com.kh.auth.api.entity;
 import com.kh.auth.api.enums.AuthProvider;
 import com.kh.auth.api.enums.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "auth_users",
@@ -15,6 +12,7 @@ import lombok.Setter;
                 @Index(name = "idx_users_email", columnList = "email", unique = true)
         })
 @Getter @Setter
+@Builder
 @NoArgsConstructor @AllArgsConstructor
 public class UserEntity extends BaseEntity {
 

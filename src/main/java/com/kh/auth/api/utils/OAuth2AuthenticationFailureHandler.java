@@ -8,11 +8,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
-    @Override
-    protected void saveException(HttpServletRequest request, HttpServletResponse response,
-                                 org.springframework.security.core.AuthenticationException exception) {
-        // noop; default logging is fine
-    }
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
@@ -22,5 +17,3 @@ public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationF
                 "http://localhost:3000/oauth2/error?message=" + exception.getMessage());
     }
 }
-
-
